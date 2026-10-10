@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+  <meta name="theme-color" content="#ec802c">
+  <title>Masak Bah! — Dapur Malaysia</title>
+  <link rel="icon" href="logo.png">
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #fbe6c8; }
+    #unity-canvas { width: 100%; height: 100%; display: block; background: #fbe6c8; touch-action: none; }
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+              background: radial-gradient(circle at 50% 40%, #ffd28a 0%, #ec802c 70%); font-family: "Trebuchet MS", sans-serif; color: #4a2e1e; }
+    #loader img { width: min(34vw, 220px); border-radius: 22%; box-shadow: 0 10px 30px rgba(80,30,0,.35); animation: bob 1.6s ease-in-out infinite; }
+    #loader h1 { margin: 22px 0 6px; font-size: min(9vw, 56px); color: #fff; text-shadow: 0 4px 0 #7a2e12; letter-spacing: 1px; }
+    #loader p { margin: 0 0 18px; font-size: min(4.5vw, 20px); color: #4a2e1e; }
+    #bar { width: min(70vw, 420px); height: 22px; border-radius: 11px; background: rgba(255,255,255,.5); border: 3px solid #7a2e12; overflow: hidden; }
+    #fill { width: 0%; height: 100%; background: #3fa34d; transition: width .2s; }
+    #msg { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: #4a2e1e; color: #fff; padding: 10px 18px;
+           border-radius: 18px; font-family: sans-serif; display: none; max-width: 90vw; }
+    @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loader">
+    <img src="logo.png" alt="">
+    <h1>Masak Bah!</h1>
+    <p id="status">Sedang menyediakan dapur…</p>
+    <div id="bar"><div id="fill"></div></div>
+  </div>
+  <div id="msg"></div>
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
+    function show(text, ms) {
+      var m = document.querySelector("#msg");
+      m.textContent = text; m.style.display = "block";
+      if (ms) setTimeout(function () { m.style.display = "none"; }, ms);
+    }
+    if (window.innerHeight > window.innerWidth) show("Pusingkan telefon ke kedudukan melintang untuk bermain.", 6000);
+
+    var buildUrl = "Build";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/WebGL.data.unityweb",
+      frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb",
+      codeUrl: buildUrl + "/WebGL.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Altrabird",
+      productName: "Masak Bah!",
+      productVersion: "1.0.0",
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      showBanner: function (msg, type) { if (type === "error") show(msg); },
+    };
+    var tips = ["Sedang menyediakan dapur…", "Mengasah pisau…", "Memanaskan kuali…", "Menumbuk sambal…", "Menarik teh…"];
+    var script = document.createElement("script");
+    script.src = buildUrl + "/WebGL.loader.js";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (p) {
+        document.querySelector("#fill").style.width = Math.round(p * 100) + "%";
+        document.querySelector("#status").textContent = tips[Math.min(tips.length - 1, Math.floor(p * tips.length))];
+      }).then(function () {
+        document.querySelector("#loader").style.display = "none";
+      }).catch(function (e) { show("Maaf, permainan gagal dimuatkan: " + e); });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
